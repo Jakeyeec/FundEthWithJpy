@@ -4,6 +4,7 @@ pragma solidity ^0.8.18;
 
 import {PriceConverter} from "./PriceConverter.sol";
 
+error notOwner();
 
 contract FundMe{
 
@@ -11,20 +12,20 @@ contract FundMe{
     using PriceConverter for uint256;
 
 
-    uint256 public minimumJpy = 500e18;
+    uint256 public constant MINIMUM_JPY = 500e18;
     
-    address public owner;
+    address public immutable i_owner;
 
 
     /*______________________________________________________________________*/
-
     constructor() {
-        owner = msg.sender;
+        i_owner = msg.sender;
+
     }
-    //"PINK"
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "sender is not owner");
+        require(i_owner == msg.sender,"not");
+        if (msg.sender != i_owner) {revert notOwner();}
         _;
     }
     /*______________________________________________________________________*/
@@ -35,7 +36,7 @@ contract FundMe{
     
     function fund() public payable {
         
-        require(msg.value.getConversionRate() >= minimumJpy,"did not send enough ether dude");
+        require(msg.value.getConversionRate() >=  MINIMUM_JPY,"did not send enough ether dude");
         funders.push(msg.sender);
         addressToAmountFunded[msg.sender] += msg.value;
     }
@@ -49,10 +50,8 @@ contract FundMe{
         funders = new address[](0);
 
         (bool callSuccess, ) = payable(msg.sender).call{value: address(this).balance}("");
-        require(callSuccess, "call failed");
+        require(callSuccess, "call failed");   
     }
-
-   
 
     }
 
