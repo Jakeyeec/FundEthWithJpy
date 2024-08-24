@@ -53,6 +53,15 @@ contract FundMe{
         require(callSuccess, "call failed");   
     }
 
+    //what would happen if someone sends this contract without using the send
+    receive() external payable {
+        fund();
+    }
+
+    fallback() external payable {
+        fund();
+    }
+    
     }
 
 
